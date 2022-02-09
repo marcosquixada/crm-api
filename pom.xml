@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.crm</groupId>
 	<artifactId>api</artifactId>
-	<version>0.1.0</version>
+	<version>1.0.0</version>
 	<name>CRM API</name>
 	<description>CRM API</description>
 	<properties>
