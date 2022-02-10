@@ -1,5 +1,10 @@
 package com.crm.api.controllers;
 
+import com.crm.api.security.jwt.AuthEntryPointJwt;
+import com.crm.api.security.jwt.JwtUtils;
+import com.crm.api.security.services.RefreshTokenService;
+import com.crm.api.security.services.UserDetailsServiceImpl;
+import com.crm.api.service.RoleService;
 import com.crm.api.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,5 +25,21 @@ class BaseController {
 
     @MockBean
     UserService userService;
+
+    @MockBean
+    RoleService roleService;
+
+    @MockBean
+    UserDetailsServiceImpl userDetailsService;
+
+    @MockBean
+    AuthEntryPointJwt authEntryPointJwt;
+
+    @MockBean
+    RefreshTokenService refreshTokenService;
+
+    @MockBean
+    JwtUtils jwtUtils;
+
 
 }
