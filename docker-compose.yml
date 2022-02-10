@@ -1,0 +1,31 @@
+version: "3.5"
+services:
+  db:
+    container_name: mypg
+    image: postgres:9.3
+    volumes:
+      - mypg:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    networks:
+      - my_network
+  api:
+    ports:
+      - 8080:8080
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    depends_on:
+      - db
+    networks:
+      - my_network
+volumes:
+  mypg: {}
+networks:
+  my_network:
+    driver: bridge

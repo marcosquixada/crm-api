@@ -11,10 +11,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
-public class UserControllerTest extends BaseController {
+class UserControllerTest extends BaseController {
 
     @Test
-   public void save() throws Exception {
+   void save() throws Exception {
         String url = "/api/v1/users";
         User user = new User("marcos", "marcos@marcos.com", "123456");
         String payload = om.writeValueAsString(user);

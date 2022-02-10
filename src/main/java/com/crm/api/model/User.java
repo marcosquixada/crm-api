@@ -1,5 +1,7 @@
 package com.crm.api.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -29,6 +31,7 @@ public class User {
 
     @NotBlank
     @Size(max = 20)
+    @Schema(defaultValue = "Marcos")
     private String username;
 
     @NotBlank

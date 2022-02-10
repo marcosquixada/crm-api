@@ -1,0 +1,57 @@
+{
+	"info": {
+		"_postman_id": "3f6d1f8a-2504-4265-b7da-9517cf1eb5ad",
+		"name": "CRM-API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Save User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"tests[\"Registered\"] = responseCode.code === 200\r",
+							"pm.test(\"The username is correct\", function () {\r",
+							"    pm.expect(pm.response.json().username).is.to.equal(\"marcos\");\r",
+							"});\r",
+							"pm.test(\"The email is correct\", function () {\r",
+							"    pm.expect(pm.response.json().email).is.to.equal(\"marcos@marcos\");\r",
+							"});\r",
+							"pm.test(\"The password is correct\", function () {\r",
+							"    pm.expect(pm.response.json().password).is.to.equal(\"123456\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"marcos\",\r\n    \"email\":\"marcos@marcos\",\r\n    \"password\":\"123456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/users",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"users"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
