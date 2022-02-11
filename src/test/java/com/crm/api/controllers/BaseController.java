@@ -5,7 +5,7 @@ import com.crm.api.security.jwt.JwtUtils;
 import com.crm.api.security.services.RefreshTokenService;
 import com.crm.api.security.services.UserDetailsServiceImpl;
 import com.crm.api.service.RoleService;
-import com.crm.api.service.UserService;
+import com.crm.api.service.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -24,7 +24,7 @@ class BaseController {
     ObjectMapper om;
 
     @MockBean
-    UserService userService;
+    AuthService userService;
 
     @MockBean
     RoleService roleService;

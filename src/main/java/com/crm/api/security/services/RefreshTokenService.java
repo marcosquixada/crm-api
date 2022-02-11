@@ -3,7 +3,7 @@ package com.crm.api.security.services;
 import com.crm.api.exception.TokenRefreshException;
 import com.crm.api.model.RefreshToken;
 import com.crm.api.repository.RefreshTokenRepository;
-import com.crm.api.repository.UserRepository;
+import com.crm.api.repository.AuthRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +18,11 @@ public class RefreshTokenService {
   private Long refreshTokenDurationMs;
 
   RefreshTokenRepository refreshTokenRepository;
-  UserRepository userRepository;
+  AuthRepository authRepository;
 
-  public RefreshTokenService(RefreshTokenRepository refreshTokenRepository, UserRepository userRepository) {
+  public RefreshTokenService(RefreshTokenRepository refreshTokenRepository, AuthRepository authRepository) {
     this.refreshTokenRepository = refreshTokenRepository;
-    this.userRepository = userRepository;
+    this.authRepository = authRepository;
   }
 
   public Optional<RefreshToken> findByToken(String token) {
@@ -32,7 +32,7 @@ public class RefreshTokenService {
   public RefreshToken createRefreshToken(UUID userId) {
     RefreshToken refreshToken = new RefreshToken();
 
-    refreshToken.setUser(userRepository.findById(userId).get());
+    refreshToken.setUser(authRepository.findById(userId).get());
     refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
     refreshToken.setToken(UUID.randomUUID().toString());
 
@@ -51,6 +51,6 @@ public class RefreshTokenService {
 
   @Transactional
   public int deleteByUserId(UUID userId) {
-    return refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
+    return refreshTokenRepository.deleteByUser(authRepository.findById(userId).get());
   }
 }
