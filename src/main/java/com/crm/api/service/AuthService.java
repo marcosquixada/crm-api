@@ -1,7 +1,11 @@
 package com.crm.api.service;
 
+import com.crm.api.model.ERole;
 import com.crm.api.model.User;
 import com.crm.api.repository.AuthRepository;
+import com.crm.api.security.services.UserDetailsServiceImpl;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,5 +27,11 @@ public class AuthService {
 
     public boolean existsByEmail(String email){
         return  authRepository.existsByEmail(email);
+    }
+
+    public boolean userCanCreateCustomer(String username){
+        UserDetailsServiceImpl userDetailsService = new UserDetailsServiceImpl(authRepository);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        return userDetails.getAuthorities().contains(ERole.ROLE_ADMIN);
     }
 }
