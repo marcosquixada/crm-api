@@ -6,52 +6,558 @@
 	},
 	"item": [
 		{
-			"name": "Save User",
-			"event": [
+			"name": "Auth Begin",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"tests[\"Registered\"] = responseCode.code === 200\r",
-							"pm.test(\"The username is correct\", function () {\r",
-							"    pm.expect(pm.response.json().username).is.to.equal(\"marcos\");\r",
-							"});\r",
-							"pm.test(\"The email is correct\", function () {\r",
-							"    pm.expect(pm.response.json().email).is.to.equal(\"marcos@marcos\");\r",
-							"});\r",
-							"pm.test(\"The password is correct\", function () {\r",
-							"    pm.expect(pm.response.json().password).is.to.equal(\"123456\");\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"username\":\"marcos\",\r\n    \"email\":\"marcos@marcos\",\r\n    \"password\":\"123456\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+					"name": "signup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Registered\"] = responseCode.code === 200\r",
+									"\r",
+									"pm.test(\"User registered\", function () {\r",
+									"    pm.expect(pm.response.json().message).is.to.equal(\"User registered successfully!\");\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var value = pm.environment.get(\"increment\");\r",
+									"if(!value){\r",
+									"    pm.environment.set(\"increment\", 1);\r",
+									"}else{\r",
+									"    pm.environment.set(\"increment\", ++value)\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
-					}
-				},
-				"url": {
-					"raw": "{{url}}/api/v1/users",
-					"host": [
-						"{{url}}"
 					],
-					"path": [
-						"api",
-						"v1",
-						"users"
-					]
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"user{{increment}}\",\r\n    \"email\":\"user{{increment}}@user\",\r\n    \"password\":\"123456\",\r\n    \"role\":[\"user\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/auth/signup",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "signin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Registered\"] = responseCode.code === 200\r",
+									"pm.test(\"The username is correct\", function () {\r",
+									"    pm.expect(pm.response.json().username).is.to.equal(\"user\" + pm.environment.get(\"increment\"));\r",
+									"});\r",
+									"pm.test(\"The email is correct\", function () {\r",
+									"    pm.expect(pm.response.json().email).is.to.equal(\"user\" + pm.environment.get(\"increment\") + \"@user\");\r",
+									"});\r",
+									"pm.environment.set(\"token\", pm.response.json().accessToken)\r",
+									"pm.environment.set(\"userId\", pm.response.json().id)\r",
+									"pm.environment.set(\"refreshToken\", pm.response.json().refreshToken)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"user{{increment}}\",\r\n    \"password\":\"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/auth/signin",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"signin"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
+		},
+		{
+			"name": "Customer",
+			"item": [
+				{
+					"name": "create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Registered\"] = responseCode.code === 200\r",
+									"\r",
+									"pm.test(\"Customer registered\", function () {\r",
+									"    pm.expect(pm.response.json().message).is.to.equal(\"Customer registered successfully!\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"customerId\", pm.response.json().id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "userId",
+								"value": "{{userId}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"customer{{increment}}\",\r\n    \"surname\": \"customer surname\",\r\n    \"photoUrl\": \"https://source.unsplash.com/400x400/?people&v=\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/customers",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getById",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Registered\"] = responseCode.code === 200\r",
+									"pm.test(\"The customer name is correct\", function () {\r",
+									"    pm.expect(pm.response.json().name).is.to.equal(\"customer\" + pm.environment.get(\"increment\"));\r",
+									"});\r",
+									"pm.test(\"The field photo is filled\", function () {\r",
+									"    pm.expect(pm.response.json().photoUrl).is.to.equal(\"https://source.unsplash.com/400x400/?people&v=\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "customerId",
+								"value": "2814770d-206e-435c-bd84-fa29366037e0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/customers/{{customerId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customers",
+								"{{customerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Registered\"] = responseCode.code === 200\r",
+									"pm.test(\"The field photo is empty\", function () {\r",
+									"    pm.expect(pm.response.json().photoUrl).is.to.equal(\"\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "id",
+								"value": "teste",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"user{{increment}}\",\r\n    \"surname\": \"surname\",\r\n    \"photoUrl\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/customers/{{customerId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customers",
+								"{{customerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listAll",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Registered\"] = responseCode.code === 200\r",
+									"var jsonData = JSON.parse(responseBody);\r",
+									"var contents = jsonData[\"content\"];\r",
+									"for(i=0;i<contents.length;i++){\r",
+									"    tests[\"At least a customer found\"] = (\"surname\" in contents[i]);\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "{{userId}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/customers/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customers",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Registered\"] = responseCode.code === 200\r",
+									"pm.test(\"The customer was deleted\", function () {\r",
+									"    pm.expect(pm.response.json().message).is.to.equal(\"Customer deleted successfully!\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "userId",
+								"value": "{{userId}}",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "customerId",
+								"value": "2814770d-206e-435c-bd84-fa29366037e0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/customers/{{customerId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customers",
+								"{{customerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getById should be not found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Customer returned\"] = responseCode.code === 200\r",
+									"pm.test(\"The customer is deleted\", function () {\r",
+									"    pm.expect(pm.response.json().deletedAt).is.not.empty;\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "customerId",
+								"value": "2814770d-206e-435c-bd84-fa29366037e0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/api/v1/customers/{{customerId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"customers",
+								"{{customerId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth End",
+			"item": [
+				{
+					"name": "refreshToken",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Registered\"] = responseCode.code === 200\r",
+									"pm.test(\"The username is correct\", function () {\r",
+									"    pm.expect(pm.response.json().accessToken).is.not.empty;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refreshToken\":\"{{refreshToken}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/auth/refreshtoken",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"refreshtoken"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Registered\"] = responseCode.code === 200\r",
+									"pm.test(\"The username is correct\", function () {\r",
+									"    pm.expect(pm.response.json().message).is.to.equal(\"Log out successful!\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"userId\":\"{{userId}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/v1/auth/logout",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }
