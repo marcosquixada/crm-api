@@ -7,6 +7,9 @@ import com.crm.api.payload.response.CustomerResponse;
 import com.crm.api.payload.response.MessageResponse;
 import com.crm.api.security.services.UserDetailsImpl;
 import com.crm.api.service.CustomerService;
+import com.crm.api.service.StorageService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,6 +17,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.Optional;
@@ -36,10 +42,16 @@ public class CustomerController {
 
     public static final String ERROR_CUSTOMER_IS_NOT_FOUND = "Error: Customer not found.";
 
+    StorageService storageService;
     CustomerService customerService;
 
-    public CustomerController(CustomerService customerService){
+    @Value("${app.awsServices.simple.storage.url")
+    private String s3Url;
+
+
+    public CustomerController(CustomerService customerService, StorageService storageService){
         this.customerService = customerService;
+        this.storageService = storageService;
     }
 
     @GetMapping
@@ -63,18 +75,28 @@ public class CustomerController {
     public ResponseEntity<?> save(
             @Schema(description ="Add user")
             @Parameter(description = "Entry Param", required = true, example = "User")
-            @Valid @RequestBody SaveCustomerRequest saveCustomerRequest){
-        log.info("Saving customer: {}", saveCustomerRequest);
+            @RequestParam(value = "file") MultipartFile file,
+            @RequestParam("customerStr") String customerStr) throws JsonProcessingException {
+        log.info("Saving customer: {}", customerStr);
 
         UserDetailsImpl userDetails = getUserDetails();
 
         UUID userIdFromContext = userDetails.getId();
 
+        ObjectMapper mapper = new ObjectMapper();
+
+        SaveCustomerRequest customerRequest = mapper.readValue(customerStr, SaveCustomerRequest.class);
+
         Customer customer = new Customer();
-        customer.setName(saveCustomerRequest.getName());
-        customer.setSurname(saveCustomerRequest.getSurname());
-        customer.setPhotoUrl(saveCustomerRequest.getPhotoUrl());
+        customer.setName(customerRequest.getName());
+        customer.setSurname(customerRequest.getSurname());
         customer.setCreatedBy(userIdFromContext);
+
+        if(file != null) {
+            log.info("Uploading Image: {}", "");
+            String fileNameReturned = storageService.uploadFile(file);
+            customer.setPhotoUrl(s3Url.concat(fileNameReturned));
+        }
 
         Customer CustomerRetrieved = customerService.save(customer);
 
@@ -102,8 +124,10 @@ public class CustomerController {
             @ApiResponse(responseCode = "200", description = "Update a customer")
     })
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    ResponseEntity<CustomerResponse> update(@PathVariable String id, @RequestBody UpdateCustomerRequest updateCustomerRequest) {
-        log.info("Updating customer: {}", updateCustomerRequest);
+    ResponseEntity<CustomerResponse> update(@PathVariable String id,
+                                            @RequestParam(value = "file") MultipartFile file,
+                                            @RequestParam("customerStr") String customerStr) throws JsonProcessingException {
+        log.info("Updating customer: {}", customerStr);
 
         UUID uuid = UUID.fromString(id);
         Optional<Customer> customerOpt = retrieveCustomer(uuid);
@@ -113,9 +137,19 @@ public class CustomerController {
         UUID userIdFromContext = userDetails.getId();
 
         customer.setUpdatedBy(userIdFromContext);
-        customer.setName(updateCustomerRequest.getName() != null ? updateCustomerRequest.getName() : customer.getName());
-        customer.setSurname(updateCustomerRequest.getSurname() != null ? updateCustomerRequest.getSurname() : customer.getSurname());
-        customer.setPhotoUrl(updateCustomerRequest.getPhotoUrl() != null ? updateCustomerRequest.getPhotoUrl() : customer.getPhotoUrl());
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        SaveCustomerRequest customerRequest = mapper.readValue(customerStr, SaveCustomerRequest.class);
+
+        customer.setName(customerRequest.getName() != null ? customerRequest.getName() : customer.getName());
+        customer.setSurname(customerRequest.getSurname() != null ? customerRequest.getSurname() : customer.getSurname());
+
+        if(file != null) {
+            log.info("Uploading Image: {}", "");
+            String fileNameReturned = storageService.uploadFile(file);
+            customer.setPhotoUrl(s3Url.concat(fileNameReturned));
+        }
 
         customer = customerService.save(customer);
         return getCustomerResponseEntity(customer);
