@@ -2,12 +2,11 @@ package com.crm.api.controller;
 
 import com.crm.api.model.Customer;
 import com.crm.api.payload.request.SaveCustomerRequest;
-import com.crm.api.payload.request.UpdateCustomerRequest;
 import com.crm.api.payload.response.CustomerResponse;
 import com.crm.api.payload.response.MessageResponse;
 import com.crm.api.security.services.UserDetailsImpl;
-import com.crm.api.service.CustomerService;
-import com.crm.api.service.StorageService;
+import com.crm.api.service.impl.CustomerServiceImpl;
+import com.crm.api.service.impl.StorageServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +16,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +28,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,16 +39,16 @@ public class CustomerController {
 
     public static final String ERROR_CUSTOMER_IS_NOT_FOUND = "Error: Customer not found.";
 
-    StorageService storageService;
-    CustomerService customerService;
+    StorageServiceImpl storageServiceImpl;
+    CustomerServiceImpl customerServiceImpl;
 
     @Value("${app.awsServices.simple.storage.url")
     private String s3Url;
 
 
-    public CustomerController(CustomerService customerService, StorageService storageService){
-        this.customerService = customerService;
-        this.storageService = storageService;
+    public CustomerController(CustomerServiceImpl customerServiceImpl, StorageServiceImpl storageServiceImpl){
+        this.customerServiceImpl = customerServiceImpl;
+        this.storageServiceImpl = storageServiceImpl;
     }
 
     @GetMapping
@@ -63,7 +60,7 @@ public class CustomerController {
     public Page<Customer> list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size){
         log.info("Listing all customers: {}", "");
         Pageable pageable = PageRequest.of(page, size);
-        return this.customerService.findByDeletedAtIsNull(pageable);
+        return this.customerServiceImpl.findByDeletedAtIsNull(pageable);
     }
 
     @PostMapping
@@ -94,11 +91,11 @@ public class CustomerController {
 
         if(file != null) {
             log.info("Uploading Image: {}", "");
-            String fileNameReturned = storageService.uploadFile(file);
+            String fileNameReturned = storageServiceImpl.uploadFile(file);
             customer.setPhotoUrl(s3Url.concat(fileNameReturned));
         }
 
-        Customer CustomerRetrieved = customerService.save(customer);
+        Customer CustomerRetrieved = customerServiceImpl.save(customer);
 
         return ResponseEntity.ok(new MessageResponse("Customer registered successfully!", CustomerRetrieved.getId()));
     }
@@ -147,11 +144,11 @@ public class CustomerController {
 
         if(file != null) {
             log.info("Uploading Image: {}", "");
-            String fileNameReturned = storageService.uploadFile(file);
+            String fileNameReturned = storageServiceImpl.uploadFile(file);
             customer.setPhotoUrl(s3Url.concat(fileNameReturned));
         }
 
-        customer = customerService.save(customer);
+        customer = customerServiceImpl.save(customer);
         return getCustomerResponseEntity(customer);
     }
 
@@ -171,12 +168,12 @@ public class CustomerController {
         UUID userIdFromContext = userDetails.getId();
 
         customer.setUpdatedBy(userIdFromContext);
-        customerService.delete(customer);
+        customerServiceImpl.delete(customer);
         return ResponseEntity.ok(new MessageResponse("Customer deleted successfully!"));
     }
 
     private Optional<Customer> retrieveCustomer(UUID id){
-         return Optional.ofNullable(customerService.findById(id).orElseThrow(() -> new RuntimeException(ERROR_CUSTOMER_IS_NOT_FOUND)));
+         return Optional.ofNullable(customerServiceImpl.findById(id).orElseThrow(() -> new RuntimeException(ERROR_CUSTOMER_IS_NOT_FOUND)));
     }
 
     private ResponseEntity<CustomerResponse> getCustomerResponseEntity(Customer customer) {

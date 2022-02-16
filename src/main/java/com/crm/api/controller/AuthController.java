@@ -15,8 +15,8 @@ import com.crm.api.payload.response.TokenRefreshResponse;
 import com.crm.api.security.jwt.JwtUtils;
 import com.crm.api.security.services.RefreshTokenService;
 import com.crm.api.security.services.UserDetailsImpl;
-import com.crm.api.service.RoleService;
-import com.crm.api.service.AuthService;
+import com.crm.api.service.impl.RoleServiceImpl;
+import com.crm.api.service.impl.AuthServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,21 +46,21 @@ public class AuthController {
     public static final String ERROR_EMAIL_IS_ALREADY_IN_USE = "Error: Email is already in use!";
 
     AuthenticationManager authenticationManager;
-    AuthService userService;
+    AuthServiceImpl userService;
     PasswordEncoder encoder;
     JwtUtils jwtUtils;
-    RoleService roleService;
+    RoleServiceImpl roleServiceImpl;
     RefreshTokenService refreshTokenService;
 
-    public AuthController(AuthService userService,
-                          RoleService roleService,
+    public AuthController(AuthServiceImpl userService,
+                          RoleServiceImpl roleServiceImpl,
                           PasswordEncoder encoder,
                           JwtUtils jwtUtils,
                           AuthenticationManager authenticationManager,
                           RefreshTokenService refreshTokenService
                           ){
         this.userService = userService;
-        this.roleService = roleService;
+        this.roleServiceImpl = roleServiceImpl;
         this.encoder = encoder;
         this.jwtUtils = jwtUtils;
         this.authenticationManager = authenticationManager;
@@ -140,26 +140,26 @@ public class AuthController {
 
     private void verifyRole(Set<String> strRoles, Set<Role> roles) {
         if (strRoles == null) {
-            Role userRole = roleService.findByName(ERole.ROLE_USER)
+            Role userRole = roleServiceImpl.findByName(ERole.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(userRole);
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
                     case "admin":
-                        Role adminRole = roleService.findByName(ERole.ROLE_ADMIN)
+                        Role adminRole = roleServiceImpl.findByName(ERole.ROLE_ADMIN)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(adminRole);
 
                         break;
                     case "mod":
-                        Role modRole = roleService.findByName(ERole.ROLE_MODERATOR)
+                        Role modRole = roleServiceImpl.findByName(ERole.ROLE_MODERATOR)
                                 .orElseThrow(() -> new RuntimeException(ERROR_ROLE_IS_NOT_FOUND));
                         roles.add(modRole);
 
                         break;
                     default:
-                        Role userRole = roleService.findByName(ERole.ROLE_USER)
+                        Role userRole = roleServiceImpl.findByName(ERole.ROLE_USER)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(userRole);
                 }
