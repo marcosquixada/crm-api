@@ -10,14 +10,13 @@ import com.crm.api.service.impl.CustomerServiceImpl;
 import com.crm.api.service.impl.StorageServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +24,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.persistence.Converter;
+import java.net.URI;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -46,10 +48,12 @@ public class CustomerControllerImpl extends CustomerBaseController implements Cu
             @ApiResponse(responseCode = "200", description = "List all customers")
     })
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public Page<Customer> list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size){
+    public Page<CustomerResponse> list(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size){
         log.info("Listing all customers: {}", "");
         Pageable pageable = PageRequest.of(page, size);
-        return this.customerServiceImpl.findByDeletedAtIsNull(pageable);
+        Page<Customer> byDeletedAtIsNull = this.customerServiceImpl.findByDeletedAtIsNull(pageable);
+
+        return byDeletedAtIsNull.map(CustomerResponse::new);
     }
 
     @Override
@@ -79,9 +83,11 @@ public class CustomerControllerImpl extends CustomerBaseController implements Cu
             customer.setPhotoUrl(s3Url.concat(fileNameReturned));
         }
 
-        Customer CustomerRetrieved = customerServiceImpl.save(customer);
+        Customer customerRetrieved = customerServiceImpl.save(customer);
 
-        return ResponseEntity.ok(new MessageResponse("Customer registered successfully!", CustomerRetrieved.getId()));
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(customerRetrieved.getId()).toUri();
+
+        return ResponseEntity.created(location).build();
     }
 
     @Override

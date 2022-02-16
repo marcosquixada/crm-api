@@ -1,14 +1,33 @@
 package com.crm.api.payload.response;
 
+import com.crm.api.model.Customer;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.sql.Timestamp;
 import java.util.UUID;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.*;
 
 public class CustomerResponse {
     private UUID id;
     private String name;
     private String surname;
     private String photoUrl;
+
+    @JsonInclude(Include.NON_NULL)
     private Timestamp deletedAt;
+
+    public CustomerResponse(Customer customer) {
+        this.id = customer.getId();
+        this.name = customer.getName();
+        this.surname = customer.getSurname();
+        this.photoUrl = customer.getPhotoUrl();
+    }
+
+    @Deprecated
+    public CustomerResponse() {
+
+    }
 
     public UUID getId() {
         return id;
