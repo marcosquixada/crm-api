@@ -1,5 +1,21 @@
 # CRM API
 
+# Table of Contents
+<details>
+<summary><b>(click to expand)</b></summary>
+<!-- Markdown -->
+
+1. [System Status:](#stats)
+2. [Technologies:](#tech)
+3. [Automated Tests:](#auto)
+
+<!-- /Markdown -->
+</details>
+
+
+
+
+<a id="stats"></a>
 ## System Status
 [![marcosquixada](https://circleci.com/gh/marcosquixada/crm-api.svg?style=svg)](<LINK>)
 [![marcosquixada](https://circleci.com/gh/marcosquixada/crm-api/tree/master.svg?style=shield)](https://circleci.com/gh/marcosquixada/marcosquixada/?branch=master)
@@ -8,6 +24,9 @@
 <a href="https://github.com/anuraghazra/github-readme-stats/issues"><img alt="Issues" src="https://img.shields.io/github/issues/marcosquixada/crm-api?color=0088ff" /></a>
 <a href="https://github.com/anuraghazra/github-readme-stats/pulls"><img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/marcosquixada/crm-api?color=0088ff" /></a>
 
+
+
+<a id="tech"></a>
 ## Technologies
 <img src="https://img.shields.io/badge/Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white" />
 <img src="https://img.shields.io/badge/Amazon_AWS-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white" />
@@ -25,3 +44,7 @@
 <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white" />
 <img src="https://img.shields.io/badge/Junit5-25A162?style=for-the-badge&logo=junit5&logoColor=white" />
 <img src="https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=Hibernate&logoColor=white" />
+
+<a id="auto"></a>
+## Automated Tests
+![alt text](https://github.com/marcosquixada/crm-api/raw/develop/assets/images/IntegrationTests-Stress-MultiEnvironment.gif "Integration Tests")
