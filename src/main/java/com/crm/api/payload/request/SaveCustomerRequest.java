@@ -44,4 +44,12 @@ public class SaveCustomerRequest implements Serializable {
     public String getUsername() { return username; }
 
     public void setUsername(String username) { this.username = username; }
+
+    @Override
+    public String toString() {
+        return "SaveCustomerRequest{" +
+                "name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                '}';
+    }
 }
