@@ -23,7 +23,7 @@ class AuthControllerTest extends BaseController {
         String url = "/api/v1/auth/signup";
         User user = new User("marcos", "marcos@marcos.com", "123456");
         String payload = om.writeValueAsString(user);
-        when(roleService.findByName(any())).thenReturn(Optional.of(new Role(ERole.ROLE_ADMIN)));
+        when(roleServiceImpl.findByName(any())).thenReturn(Optional.of(new Role(ERole.ROLE_ADMIN)));
         when(userService.save(user)).thenReturn(user);
 
         mockMvc.perform(post(url)
