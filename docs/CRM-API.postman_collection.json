@@ -130,13 +130,12 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"tests[\"Registered\"] = responseCode.code === 200\r",
+									"tests[\"Registered\"] = responseCode.code === 201\r",
 									"\r",
 									"pm.test(\"Customer registered\", function () {\r",
-									"    pm.expect(pm.response.json().message).is.to.equal(\"Customer registered successfully!\");\r",
-									"});\r",
-									"\r",
-									"pm.environment.set(\"customerId\", pm.response.json().id);"
+									"    var location  = pm.response.headers.get(\"Location\").substr(39,74);\r",
+									"    pm.environment.set(\"customerId\", location);   \r",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -163,13 +162,19 @@
 							}
 						],
 						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\":\"customer{{increment}}\",\r\n    \"surname\": \"customer surname\",\r\n    \"photoUrl\": \"https://source.unsplash.com/400x400/?people&v=\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/C:/Users/marcos/Downloads/1644766692056_goku.jpg"
+								},
+								{
+									"key": "customerStr",
+									"value": "{\"name\":\"user{{increment}}\", \"surname\":\"Customer Surname\"}",
+									"type": "text"
 								}
-							}
+							]
 						},
 						"url": {
 							"raw": "{{url}}/api/v1/customers",
