@@ -1,6 +1,6 @@
 package com.crm.api.controllers;
 
-import com.crm.api.controller.AuthController;
+import com.crm.api.controller.impl.AuthControllerImpl;
 import com.crm.api.model.ERole;
 import com.crm.api.model.Role;
 import com.crm.api.model.User;
@@ -15,8 +15,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AuthController.class)
-class AuthControllerTest extends BaseController {
+@WebMvcTest(AuthControllerImpl.class)
+class AuthControllerImplTest extends BaseController {
 
     @Test
    void save() throws Exception {

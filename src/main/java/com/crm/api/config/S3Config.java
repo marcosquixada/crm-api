@@ -1,4 +1,4 @@
-package com.crm.api.security;
+package com.crm.api.config;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
